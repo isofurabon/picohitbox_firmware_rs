@@ -58,7 +58,7 @@ static mut USB_HID: Option<HIDClass<hal::usb::UsbBus>> = None;
 #[gen_hid_descriptor(
     (collection = APPLICATION, usage_page = GENERIC_DESKTOP, usage = GAMEPAD) = {
         (usage_page = BUTTON, usage_min = BUTTON_1, usage_max = BUTTON_8) = {
-            #[item_settings data,variable,absolute] buttons = input;
+            #[packed_bits 8] #[item_settings data,variable,absolute] buttons = input;
         };
     }
 )]
