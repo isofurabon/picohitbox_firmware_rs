@@ -66,7 +66,7 @@ static mut USB_HID: Option<HIDClass<hal::usb::UsbBus>> = None;
     }
 )]
 pub struct GamepadReport {
-    pub buttons: u16,
+    pub buttons: [u8; 2],
     pub hatstate: u8,
 }
 
@@ -149,7 +149,7 @@ fn main() -> ! {
         delay.delay_ms(100);
 
         let rep_up = GamepadReport {
-            buttons: 0x01,
+            buttons: [0x00, 0x01],
             hatstate: 0x01,
         };
         push_mouse_movement(rep_up).ok().unwrap_or(0);
@@ -157,7 +157,7 @@ fn main() -> ! {
         delay.delay_ms(100);
 
         let rep_down = GamepadReport {
-            buttons: 0x00,
+            buttons: [0x00, 0x00],
             hatstate: 0x00,
         };
         push_mouse_movement(rep_down).ok().unwrap_or(0);
