@@ -57,17 +57,13 @@ static mut USB_HID: Option<HIDClass<hal::usb::UsbBus>> = None;
 // HID descriptor for Gamepad
 #[gen_hid_descriptor(
     (collection = APPLICATION, usage_page = GENERIC_DESKTOP, usage = GAMEPAD) = {
-        (usage_page = BUTTON, usage_min = 1, usage_max = 12) = {
-            #[packed_bits 12] #[item_settings data,variable,absolute,not_null,no_wrap,linear] buttons = input;
+        (usage_page = BUTTON, usage_min = 1, usage_max = 16) = {
+            #[packed_bits 16] #[item_settings data,variable,absolute,not_null,no_wrap,linear] buttons = input;
         };
-        (usage_page = GENERIC_DESKTOP, usage = 0x39) = {
-            #[item_settings data,variable,absolute] hatstate = input;
-        }
     }
 )]
 pub struct GamepadReport {
-    pub buttons: [u8; 2],
-    pub hatstate: u8,
+    pub buttons: u16,
 }
 
 /// Entry point to our bare-metal application.
@@ -149,16 +145,14 @@ fn main() -> ! {
         delay.delay_ms(100);
 
         let rep_up = GamepadReport {
-            buttons: [0x00, 0x01],
-            hatstate: 0x01,
+            buttons: 0,
         };
         push_mouse_movement(rep_up).ok().unwrap_or(0);
 
         delay.delay_ms(100);
 
         let rep_down = GamepadReport {
-            buttons: [0x00, 0x00],
-            hatstate: 0x00,
+            buttons: 1,
         };
         push_mouse_movement(rep_down).ok().unwrap_or(0);
     }
