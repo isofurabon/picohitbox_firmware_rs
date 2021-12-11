@@ -122,7 +122,7 @@ fn main() -> ! {
     }
 
     // Create a USB device with a fake VID and PID
-    let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27da))
+    let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27d9))
         .manufacturer("Fake company")
         .product("pico Hitbox")
         .serial_number("0001")
