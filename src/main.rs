@@ -125,7 +125,7 @@ fn main() -> ! {
     let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27da))
         .manufacturer("Fake company")
         .product("pico Hitbox")
-        .serial_number("TEST")
+        .serial_number("0001")
         .device_class(0x03) // misc
         .build();
     unsafe {
