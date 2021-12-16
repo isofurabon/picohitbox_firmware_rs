@@ -28,6 +28,9 @@ use panic_halt as _;
 use embedded_time::fixed_point::FixedPoint;
 use pico::hal::prelude::*;
 
+use rp2040_hal::gpio::{Pin, bank0::*, PullUpInput};
+
+
 // A shorter alias for the Peripheral Access Crate, which provides low-level
 // register access
 use pico::hal::pac;
@@ -64,6 +67,29 @@ static mut USB_HID: Option<HIDClass<hal::usb::UsbBus>> = None;
 )]
 pub struct GamepadReport {
     pub buttons: u16,
+struct GamePad {
+    // left, up, right, down
+    btnl: Pin<Gpio11, PullUpInput>,
+    btnu: Pin<Gpio10, PullUpInput>,
+    btnr: Pin<Gpio9, PullUpInput>,
+    btnd: Pin<Gpio8, PullUpInput>,
+
+    // button 1 ~ 8
+    btn1: Pin<Gpio3, PullUpInput>,
+    btn2: Pin<Gpio2, PullUpInput>,
+    btn3: Pin<Gpio1, PullUpInput>,
+    btn4: Pin<Gpio0, PullUpInput>,
+    btn5: Pin<Gpio7, PullUpInput>,
+    btn6: Pin<Gpio6, PullUpInput>,
+    btn7: Pin<Gpio5, PullUpInput>,
+    btn8: Pin<Gpio4, PullUpInput>,
+
+    // option button 1 ~ 4
+    opt1: Pin<Gpio15, PullUpInput>,
+    opt2: Pin<Gpio14, PullUpInput>,
+    opt3: Pin<Gpio13, PullUpInput>,
+    opt4: Pin<Gpio12, PullUpInput>,
+}
 }
 
 /// Entry point to our bare-metal application.
