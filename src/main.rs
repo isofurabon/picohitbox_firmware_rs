@@ -165,6 +165,26 @@ fn main() -> ! {
     };
     let core = pac::CorePeripherals::take().unwrap();
     let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().integer());
+    let gamepad = GamePad {
+        btnl: pins.gpio11.into_pull_up_input(),
+        btnu: pins.gpio10.into_pull_up_input(),
+        btnr: pins.gpio9.into_pull_up_input(),
+        btnd: pins.gpio8.into_pull_up_input(),
+
+        btn1: pins.gpio3.into_pull_up_input(),
+        btn2: pins.gpio2.into_pull_up_input(),
+        btn3: pins.gpio1.into_pull_up_input(),
+        btn4: pins.gpio0.into_pull_up_input(),
+        btn5: pins.gpio7.into_pull_up_input(),
+        btn6: pins.gpio6.into_pull_up_input(),
+        btn7: pins.gpio5.into_pull_up_input(),
+        btn8: pins.gpio4.into_pull_up_input(),
+
+        opt1: pins.gpio15.into_pull_up_input(),
+        opt2: pins.gpio14.into_pull_up_input(),
+        opt3: pins.gpio13.into_pull_up_input(),
+        opt4: pins.gpio12.into_pull_up_input(),
+    };
 
     // Move the cursor up and down every 200ms
     loop {
