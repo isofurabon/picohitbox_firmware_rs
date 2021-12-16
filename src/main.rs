@@ -28,6 +28,7 @@ use panic_halt as _;
 use embedded_time::fixed_point::FixedPoint;
 use pico::hal::prelude::*;
 
+use embedded_hal::digital::v2::InputPin;
 use rp2040_hal::gpio::{Pin, bank0::*, PullUpInput};
 
 
@@ -65,8 +66,10 @@ static mut USB_HID: Option<HIDClass<hal::usb::UsbBus>> = None;
         };
     }
 )]
-pub struct GamepadReport {
-    pub buttons: u16,
+struct GamepadReport {
+    buttons: [u8; 2],
+}
+
 struct GamePad {
     // left, up, right, down
     btnl: Pin<Gpio11, PullUpInput>,
@@ -90,6 +93,48 @@ struct GamePad {
     opt3: Pin<Gpio13, PullUpInput>,
     opt4: Pin<Gpio12, PullUpInput>,
 }
+
+impl GamePad {
+    fn get_input(&self) -> [u8; 2] {
+        let mut state: u16 = 0;
+
+        state |= self.get_hat_input();
+        state |= self.get_btn_input();
+        state |= self.get_opt_input();
+
+        // convert u16 -> u8;2
+        state.to_le_bytes()
+    } 
+
+    fn get_hat_input(&self) -> u16 {
+        0
+    }
+
+    fn get_btn_input(&self) -> u16 {
+        0
+    }
+
+    fn get_opt_input(&self) -> u16 {
+        let mut state: u16 = 0;
+
+        if self.opt1.is_low().unwrap() {
+            state |= 1_u16 << 15;
+        }
+
+        if self.opt2.is_low().unwrap() {
+            state |= 1_u16 << 14;
+        }
+
+        if self.opt3.is_low().unwrap() {
+            state |= 1_u16 << 13;
+        }
+
+        if self.opt4.is_low().unwrap() {
+            state |= 1_u16 << 12;
+        }
+
+        state
+    }
 }
 
 /// Entry point to our bare-metal application.
@@ -149,7 +194,7 @@ fn main() -> ! {
 
     // Create a USB device with a fake VID and PID
     let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27d9))
-        .manufacturer("Fake company")
+        .manufacturer("isofurabonjour")
         .product("pico Hitbox")
         .serial_number("0001")
         .device_class(0x03) // misc
@@ -163,8 +208,16 @@ fn main() -> ! {
         // Enable the USB interrupt
         pac::NVIC::unmask(hal::pac::Interrupt::USBCTRL_IRQ);
     };
-    let core = pac::CorePeripherals::take().unwrap();
-    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().integer());
+
+    // Init pins
+    let sio = hal::Sio::new(pac.SIO);
+    let pins = pico::Pins::new(
+        pac.IO_BANK0,
+        pac.PADS_BANK0,
+        sio.gpio_bank0,
+        &mut pac.RESETS
+    );
+
     let gamepad = GamePad {
         btnl: pins.gpio11.into_pull_up_input(),
         btnu: pins.gpio10.into_pull_up_input(),
@@ -188,19 +241,11 @@ fn main() -> ! {
 
     // Move the cursor up and down every 200ms
     loop {
-        delay.delay_ms(100);
-
-        let rep_up = GamepadReport {
-            buttons: 0,
+        // delay.delay_ms(100);
+        let report = GamepadReport {
+            buttons: gamepad.get_input(),
         };
-        push_mouse_movement(rep_up).ok().unwrap_or(0);
-
-        delay.delay_ms(100);
-
-        let rep_down = GamepadReport {
-            buttons: 1,
-        };
-        push_mouse_movement(rep_down).ok().unwrap_or(0);
+        push_mouse_movement(report).ok().unwrap_or(0);
     }
 }
 
