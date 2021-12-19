@@ -25,8 +25,8 @@ use pico::hal::pac::interrupt;
 use panic_halt as _;
 
 // Pull in any important traits
-use embedded_time::fixed_point::FixedPoint;
-use pico::hal::prelude::*;
+// use embedded_time::fixed_point::FixedPoint;
+// use pico::hal::prelude::*;
 
 use embedded_hal::digital::v2::InputPin;
 use rp2040_hal::gpio::{Pin, bank0::*, PullUpInput};
@@ -107,30 +107,100 @@ impl GamePad {
     } 
 
     fn get_hat_input(&self) -> u16 {
-        0
+        let mut state: u16 = 0;
+
+        if self.btnl.is_low().unwrap() {
+            state |= 1_u16;
+        }
+
+        if self.btnd.is_low().unwrap() {
+            state |= 1_u16 << 1;
+        }
+
+        if self.btnr.is_low().unwrap() {
+            state |= 1_u16 << 2;
+        }
+
+        if self.btnu.is_low().unwrap() {
+            state |= 1_u16 << 3;
+        }
+
+        self.soc_cleaner(state)
+    }
+
+    fn soc_cleaner(&self, hat_state: u16) -> u16 {
+        let mut state = hat_state;
+
+        // left and right, up and down
+        let lr = 1_u16 | (1_u16 << 1);
+        let ud = (1_u16 << 1) | (1_u16 << 3);
+
+        if (state & lr) == lr {
+            state &= !lr;
+        }
+
+        if (state & ud) == ud {
+            state &= !(1_u16 << 3);
+        }
+
+        state
     }
 
     fn get_btn_input(&self) -> u16 {
-        0
+        let mut state: u16 = 0;
+
+        if self.btn1.is_low().unwrap() {
+            state |= 1_u16 << 4;
+        }
+
+        if self.btn2.is_low().unwrap() {
+            state |= 1_u16 << 5;
+        }
+
+        if self.btn3.is_low().unwrap() {
+            state |= 1_u16 << 6;
+        }
+
+        if self.btn4.is_low().unwrap() {
+            state |= 1_u16 << 7;
+        }
+
+        if self.btn5.is_low().unwrap() {
+            state |= 1_u16 << 8;
+        }
+
+        if self.btn6.is_low().unwrap() {
+            state |= 1_u16 << 9;
+        }
+
+        if self.btn7.is_low().unwrap() {
+            state |= 1_u16 << 10;
+        }
+
+        if self.btn8.is_low().unwrap() {
+            state |= 1_u16 << 11;
+        }
+
+        state
     }
 
     fn get_opt_input(&self) -> u16 {
         let mut state: u16 = 0;
 
         if self.opt1.is_low().unwrap() {
-            state |= 1_u16 << 15;
+            state |= 1_u16 << 12;
         }
 
         if self.opt2.is_low().unwrap() {
-            state |= 1_u16 << 14;
-        }
-
-        if self.opt3.is_low().unwrap() {
             state |= 1_u16 << 13;
         }
 
+        if self.opt3.is_low().unwrap() {
+            state |= 1_u16 << 14;
+        }
+
         if self.opt4.is_low().unwrap() {
-            state |= 1_u16 << 12;
+            state |= 1_u16 << 15;
         }
 
         state
@@ -239,20 +309,18 @@ fn main() -> ! {
         opt4: pins.gpio12.into_pull_up_input(),
     };
 
-    // Move the cursor up and down every 200ms
     loop {
-        // delay.delay_ms(100);
         let report = GamepadReport {
             buttons: gamepad.get_input(),
         };
-        push_mouse_movement(report).ok().unwrap_or(0);
+        push_gamepad_movement(report).ok().unwrap_or(0);
     }
 }
 
 /// Submit a new mouse movement report to the USB stack.
 ///
 /// We do this with interrupts disabled, to avoid a race hazard with the USB IRQ.
-fn push_mouse_movement(report: GamepadReport) -> Result<usize, usb_device::UsbError> {
+fn push_gamepad_movement(report: GamepadReport) -> Result<usize, usb_device::UsbError> {
     cortex_m::interrupt::free(|_| unsafe {
         // Now interrupts are disabled, grab the global variable and, if
         // available, send it a HID report
