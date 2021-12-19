@@ -73,9 +73,9 @@ struct GamepadReport {
 struct GamePad {
     // left, up, right, down
     btnl: Pin<Gpio11, PullUpInput>,
-    btnu: Pin<Gpio10, PullUpInput>,
+    btnd: Pin<Gpio10, PullUpInput>,
     btnr: Pin<Gpio9, PullUpInput>,
-    btnd: Pin<Gpio8, PullUpInput>,
+    btnu: Pin<Gpio8, PullUpInput>,
 
     // button 1 ~ 8
     btn1: Pin<Gpio3, PullUpInput>,
@@ -132,15 +132,17 @@ impl GamePad {
         let mut state = hat_state;
 
         // left and right, up and down
-        let lr = 1_u16 | (1_u16 << 1);
+        let lr = 1_u16 | (1_u16 << 2);
         let ud = (1_u16 << 1) | (1_u16 << 3);
 
+        // if left and right are pressed, ignore both of them.
         if (state & lr) == lr {
             state &= !lr;
         }
 
+        // if up and down are pressed, input up.
         if (state & ud) == ud {
-            state &= !(1_u16 << 3);
+            state &= !(1_u16 << 1);
         }
 
         state
@@ -290,9 +292,9 @@ fn main() -> ! {
 
     let gamepad = GamePad {
         btnl: pins.gpio11.into_pull_up_input(),
-        btnu: pins.gpio10.into_pull_up_input(),
+        btnd: pins.gpio10.into_pull_up_input(),
         btnr: pins.gpio9.into_pull_up_input(),
-        btnd: pins.gpio8.into_pull_up_input(),
+        btnu: pins.gpio8.into_pull_up_input(),
 
         btn1: pins.gpio3.into_pull_up_input(),
         btn2: pins.gpio2.into_pull_up_input(),
