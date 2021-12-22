@@ -60,7 +60,7 @@ static mut USB_HID: Option<HIDClass<hal::usb::UsbBus>> = None;
 
 // HID descriptor for Gamepad
 #[gen_hid_descriptor(
-    (collection = APPLICATION, usage_page = GENERIC_DESKTOP, usage = GAMEPAD) = {
+    (collection = APPLICATION, usage_page = GENERIC_DESKTOP, usage = GAMEPAD, ) = {
         (usage_page = BUTTON, usage_min = 1, usage_max = 16) = {
             #[packed_bits 16] #[item_settings data,variable,absolute,not_null,no_wrap,linear] buttons = input;
         };
@@ -258,18 +258,19 @@ fn main() -> ! {
     let bus_ref = unsafe { USB_BUS.as_ref().unwrap() };
 
     // Set up the USB HID Class Device driver, providing Mouse Reports
-    let usb_hid = HIDClass::new(bus_ref, GamepadReport::desc(), 10);
+    let usb_hid = HIDClass::new(bus_ref, GamepadReport::desc(), 1);
     unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet.
         USB_HID = Some(usb_hid);
     }
 
     // Create a USB device with a fake VID and PID
-    let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x16c0, 0x27d9))
+    let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x1209, 0x0001))
         .manufacturer("isofurabonjour")
-        .product("pico Hitbox")
-        .serial_number("0001")
-        .device_class(0x03) // misc
+        .product("pico hitbox")
+        .serial_number("1.0")
+        .device_class(0x00) // Device
+        .device_release(0x0100)
         .build();
     unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet
