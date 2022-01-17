@@ -275,9 +275,7 @@ fn main() -> ! {
     let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x1209, 0x0001))
         .manufacturer("isofurabonjour")
         .product("pico hitbox")
-        .serial_number("1.0")
-        .device_class(0x00) // Device
-        .device_release(0x0100)
+        .device_class(3) // HID
         .build();
     unsafe {
         // Note (safety): This is safe as interrupts haven't been started yet
