@@ -70,6 +70,7 @@ struct GamepadReport {
     buttons: [u8; 2],
 }
 
+// HID descriptor for GamePad
 struct GamePad {
     // left, up, right, down
     btnl: Pin<Gpio11, PullUpInput>,
@@ -94,7 +95,9 @@ struct GamePad {
     opt4: Pin<Gpio12, PullUpInput>,
 }
 
+// The USB HID Class driver
 impl GamePad {
+
     fn get_input(&self) -> [u8; 2] {
         let mut state: u16 = 0;
 
@@ -106,6 +109,7 @@ impl GamePad {
         state.to_le_bytes()
     } 
 
+    // get hat input
     fn get_hat_input(&self) -> u16 {
         let mut state: u16 = 0;
 
@@ -128,6 +132,7 @@ impl GamePad {
         self.soc_cleaner(state)
     }
 
+    // get button input
     fn soc_cleaner(&self, hat_state: u16) -> u16 {
         let mut state = hat_state;
 
@@ -148,6 +153,7 @@ impl GamePad {
         state
     }
 
+    // get button input
     fn get_btn_input(&self) -> u16 {
         let mut state: u16 = 0;
 
@@ -186,6 +192,7 @@ impl GamePad {
         state
     }
 
+    // get option button input
     fn get_opt_input(&self) -> u16 {
         let mut state: u16 = 0;
 
