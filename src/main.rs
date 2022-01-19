@@ -294,7 +294,7 @@ fn main() -> ! {
     }
 
     // Create a USB device with a fake VID and PID
-    let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x1209, 0x0001))
+    let usb_dev = UsbDeviceBuilder::new(bus_ref, UsbVidPid(0x0F0D, 0x0011 /* HORI RAP3 */))
         .manufacturer("isofurabonjour")
         .product("pico hitbox")
         .device_class(3) // HID
