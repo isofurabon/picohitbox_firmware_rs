@@ -151,23 +151,23 @@ impl GamePad {
             state |= 1_u16 << 3;
         }
 
-        self.soc_cleaner(state)
+        self.socd_cleaner(state)
     }
 
-    // get button input
-    fn soc_cleaner(&self, hat_state: u16) -> u16 {
+    // SOCD cleaner
+    fn socd_cleaner(&self, hat_state: u16) -> u16 {
         let mut state = hat_state;
 
         // left and right, up and down
         let lr = 1_u16 | (1_u16 << 2);
         let ud = (1_u16 << 1) | (1_u16 << 3);
 
-        // if left and right are pressed, ignore both of them.
+        // if left and right are pressed at the same time, ignore both of them.
         if (state & lr) == lr {
             state &= !lr;
         }
 
-        // if up and down are pressed, input up.
+        // if up and down are pressed at the same time, apply only up.
         if (state & ud) == ud {
             state &= !(1_u16 << 1);
         }
