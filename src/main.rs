@@ -167,9 +167,9 @@ impl GamePad {
             state &= !lr;
         }
 
-        // if up and down are pressed at the same time, apply only up.
+        // if up and down are pressed at the same time, ignore both of them.
         if (state & ud) == ud {
-            state &= !(1_u16 << 1);
+            state &= !ud;
         }
 
         state
